@@ -13,6 +13,8 @@ public interface Segment {
 	
 	double length(Point2D point);
 	
+	Point2D pointAt(Point2D p0, double t);
+	
 	static Point2D affineCombo(Point2D[] points, double[] coeff) {
 		if (coeff == null || points == null || points.length != coeff.length || points.length == 0 || coeff.length == 0) {
 			throw new IllegalArgumentException();

@@ -44,6 +44,10 @@ class TestSegment {
 		double[] coeffs5 = {20, -19};
 		assertEquals(-74, Segment.affineCombo(points, coeffs5).getX(), 1e-6);
 		assertEquals(4, Segment.affineCombo(points, coeffs5).getY(), 1e-6);
+		
+		double[] coeffs6 = {-99, 100};
+		assertEquals(402, Segment.affineCombo(points, coeffs6).getX(), 1e-6);
+		assertEquals(4, Segment.affineCombo(points, coeffs5).getY(), 1e-6);
 	}
 	
 }
