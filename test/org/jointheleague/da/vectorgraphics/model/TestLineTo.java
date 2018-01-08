@@ -26,7 +26,6 @@ class TestLineTo {
 	void testConstructor() {
 		coords = new double[]{1, 2, 3, 4, 5, 6};
 		line = new LineTo(coords);
-		p0 = new Point2D.Double(0, 0);
 		assertNotNull(line);
 		assertTrue(line instanceof Segment);
 		Point2D p = new Point2D.Double(1, 2);
@@ -75,6 +74,23 @@ class TestLineTo {
 		assertEquals(TestUtils.getLastSegment(path, coords), PathIterator.SEG_LINETO);
 		assertEquals(0, coords[0]);
 		assertEquals(0.5, coords[1]);
+	}
+	
+	@Test
+	void testAddToWithT2() {
+		coords = new double[]{0, 1, 3, 4, 5, 6};
+		line = new LineTo(coords);
+		Path2D path = new Path2D.Double();
+		path.moveTo(0, 0);
+		double t0 = 0.68;
+		line.addTo(path, t0);
+		TestUtils.getLastSegment(path, coords);
+		Point2D pt = new Point2D.Double(coords[0], coords[1]);
+		LineTo line2 = new LineTo(coords);
+		p0 = new Point2D.Double(0, 0);
+		for (double t = 0; t <= 1.0; t+=0.01) {
+			assertEquals(line2.pointAt(p0, t), line.pointAt(p0, t*t0));
+		}
 	}
 	
 }

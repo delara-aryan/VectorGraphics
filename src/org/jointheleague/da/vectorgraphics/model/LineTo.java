@@ -11,6 +11,10 @@ public class LineTo implements Segment{
 		p1 = new Point2D.Double(coords[0], coords[1]);
 	}
 	
+	public LineTo(Point2D p1) {
+		this.p1 = p1;
+	}
+	
 	public Point2D getP1() {
 		return p1;
 	}
