@@ -63,17 +63,16 @@ class TestCubicTo {
 	@Test
 	void testAddToT() {
 		double[] coords = new double[] { 1, 2, 3, 4, 5, 6 };
-		QuadTo quad = new QuadTo(coords);
+		CubicTo cubic = new CubicTo(coords);
 		Path2D path = new Path2D.Double(0, 0);
 		path.moveTo(0, 0);
 		double t0 = new Random().nextDouble();
-		quad.addTo(path, t0);
+		cubic.addTo(path, t0);
 		TestUtils.getLastSegment(path, coords);
-		Point2D pt = new Point2D.Double(coords[0], coords[1]);
-		QuadTo quad2 = new QuadTo(coords);
+		CubicTo cubic2 = new CubicTo(coords);
 		Point2D p0 = new Point2D.Double(0, 0);
 		for (double t = 0; t <= 1.0; t += 0.01) {
-			TestUtils.assertEqualPoints(quad2.pointAt(p0, t), quad.pointAt(p0, t * t0));
+			TestUtils.assertEqualPoints(cubic2.pointAt(p0, t), cubic.pointAt(p0, t * t0));
 		}
 	}
 
