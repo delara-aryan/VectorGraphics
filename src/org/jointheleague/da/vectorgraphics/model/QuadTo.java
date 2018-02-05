@@ -13,6 +13,11 @@ public class QuadTo implements Segment{
 		p2 = new Point2D.Double(coords[2], coords[3]);
 	}
 	
+	public QuadTo(Point2D p1, Point2D p2) {
+		this.p1 = p1;
+		this.p2 = p2;
+	}
+	
 	@Override
 	public Path2D addTo(Path2D path) {
 		path.quadTo(p1.getX(), p1.getY(), p2.getX(), p2.getY());

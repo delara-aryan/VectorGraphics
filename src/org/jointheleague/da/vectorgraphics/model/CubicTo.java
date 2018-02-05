@@ -17,7 +17,7 @@ public class CubicTo implements Segment {
 
 	@Override
 	public Path2D addTo(Path2D path) {
-		path.quadTo(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+		path.curveTo(p1.getX(), p1.getY(), p2.getX(), p2.getY(), p3.getX(), p3.getY());
 		return path;
 	}
 
@@ -26,8 +26,10 @@ public class CubicTo implements Segment {
 		Point2D p0 = path.getCurrentPoint();
 		LineTo line = new LineTo(p1);
 		Point2D m0 = line.pointAt(p0, t);
-		Point2D q0 = this.pointAt(p0, t);
-		path.quadTo(m0.getX(), m0.getY(), q0.getX(), q0.getY());
+		QuadTo quad = new QuadTo(p1, p2);
+		Point2D q0 = quad.pointAt(p0, t);
+		Point2D c0 = this.pointAt(p0, t);
+		path.curveTo(m0.getX(), m0.getY(), q0.getX(), q0.getY(), c0.getX(), c0.getY());
 		return path;
 	}
 
