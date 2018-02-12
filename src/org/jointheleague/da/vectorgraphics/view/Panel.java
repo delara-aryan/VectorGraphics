@@ -19,11 +19,14 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import org.jointheleague.da.vectorgraphics.model.PartialPath;
+
 public class Panel extends JPanel {
 
 	private PathIterator pathIterator;
-	private Path2D path;
+	private Path2D path = new Path2D.Double();
 	private Timer ticker;
+	private PartialPath partialPath;
 
 	public static void main(String[] args) {
 		Panel panel = new Panel();
@@ -38,14 +41,15 @@ public class Panel extends JPanel {
 		frame.pack();
 		frame.setVisible(true);
 		pathIterator = getPathIterator(getTextLayout("World!", new Font(Font.SERIF, Font.PLAIN, 144)));
-		path = new Path2D.Double();
+		partialPath = new PartialPath(pathIterator);
 		ticker = new Timer(20, (e) -> update());
 		ticker.start();
 	}
 
 	private void update() {
-		if (!pathIterator.isDone()) {
-			path = nextSegment(pathIterator, path);
+		if (!partialPath.isComplete()) {
+			partialPath.incrementTime();
+			path = partialPath.getPath();
 			repaint();
 		} else {
 			ticker.stop();

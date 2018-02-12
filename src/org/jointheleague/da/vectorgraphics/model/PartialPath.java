@@ -3,8 +3,9 @@ package org.jointheleague.da.vectorgraphics.model;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
+import java.util.Observable;
 
-public class PartialPath {
+public class PartialPath extends Observable{
 
 	private final PathIterator pi;
 	private final Path2D path;
@@ -48,19 +49,26 @@ public class PartialPath {
 		return speed;
 	}
 
-	void incrementTime() {
+	public void incrementTime() {
+		if (t < 1) {
+			t += speed / currentSegment.length(path.getCurrentPoint());
+		}
 		if (t >= 1) {
+			if(currentSegment != null) {
+				currentSegment.addTo(path);
+				currentSegment = null;
+			}	
 			if (!pi.isDone()) {
 				t = 0;
 				pi.next();
 				currentSegment = getCurrentSegment(pi);
 			}
-		} else {
-			t += speed / currentSegment.length(path.getCurrentPoint());
 		}
+		setChanged();
+		notifyObservers();
 	}
 
-	Path2D getPath() {
+	public Path2D getPath() {
 		if (t == 0 || t >= 1) {
 			return path;			
 		} else {
@@ -68,5 +76,9 @@ public class PartialPath {
 			currentSegment.addTo(copy, t);
 			return copy;
 		}
+	}
+	
+	public boolean isComplete() {
+		return pi.isDone();
 	}
 }

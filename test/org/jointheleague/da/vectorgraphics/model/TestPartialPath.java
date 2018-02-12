@@ -4,10 +4,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.junit.jupiter.api.Test;
 
 class TestPartialPath {
+	
+	private boolean notified = false;
 
 	@Test
 	void testConstructor() {
@@ -39,27 +43,60 @@ class TestPartialPath {
 	
 	@Test
 	void testIncrementTime() {
-		Path2D path1 = new Path2D.Double();
-		path1.moveTo(0, 0);
-		path1.lineTo(1, 0);
-		PathIterator pi = path1.getPathIterator(null);
-		PartialPath partialPath = new PartialPath(pi);
+		Path2D pathIn = new Path2D.Double();
+		pathIn.moveTo(0, 0);
+		pathIn.lineTo(1, 0);
+		PathIterator piIn = pathIn.getPathIterator(null);
+		PartialPath partialPath = new PartialPath(piIn);
 		partialPath.setSpeed(0.5);
 		partialPath.incrementTime();
-		partialPath.incrementTime();
-		Path2D path3 = partialPath.getPath();
-		PathIterator pi2 = path3.getPathIterator(null);
+		Path2D pathOut = partialPath.getPath();
+		PathIterator piOut = pathOut.getPathIterator(null);
 		double[] coords1 = new double[6];
-		int type = pi2.currentSegment(coords1);
+		int type = piOut.currentSegment(coords1);
 		assertEquals(0, coords1[0]);
 		assertEquals(0, coords1[1]);
 		assertEquals(PathIterator.SEG_MOVETO, type);
 		partialPath.incrementTime();
-		pi2.next();
-		type = pi2.currentSegment(coords1);
+		pathOut = partialPath.getPath();
+		piOut = pathOut.getPathIterator(null);
+		piOut.next();
+		type = piOut.currentSegment(coords1);
 		assertEquals(PathIterator.SEG_LINETO, type);
 		assertEquals(0.5, coords1[0]);
 		assertEquals(0, coords1[1]);
+		assertFalse(partialPath.isComplete());
+		partialPath.incrementTime();
+		pathOut = partialPath.getPath();
+		piOut = pathOut.getPathIterator(null);
+		piOut.next();
+		type = piOut.currentSegment(coords1);
+		assertEquals(PathIterator.SEG_LINETO, type);
+		assertEquals(1, coords1[0]);
+		assertEquals(0, coords1[1]);
+		assertTrue(partialPath.isComplete());
+	}
+	
+	@Test
+	void testObserver() {
+		Path2D pathIn = new Path2D.Double();
+		pathIn.moveTo(0, 0);
+		pathIn.lineTo(1, 0);
+		PathIterator piIn = pathIn.getPathIterator(null);
+		PartialPath partialPath = new PartialPath(piIn);
+		partialPath.setSpeed(0.5);
+		Observer observer = new Observer() {
+
+			@Override
+			public void update(Observable o, Object arg) {
+				notified = true;
+			}
+			
+		};
+		partialPath.addObserver(observer);
+		partialPath.incrementTime();
+		assertTrue(notified)	;
+		
 	}
 
 }
