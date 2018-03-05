@@ -13,6 +13,8 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -21,7 +23,7 @@ import javax.swing.Timer;
 
 import org.jointheleague.da.vectorgraphics.model.PartialPath;
 
-public class Panel extends JPanel {
+public class Panel extends JPanel implements Observer {
 
 	private PathIterator pathIterator;
 	private Path2D path = new Path2D.Double();
@@ -40,8 +42,10 @@ public class Panel extends JPanel {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();
 		frame.setVisible(true);
-		pathIterator = getPathIterator(getTextLayout("World!", new Font(Font.SERIF, Font.PLAIN, 144)));
+		pathIterator = getPathIterator(getTextLayout("Hello, World!", new Font(Font.SANS_SERIF, Font.PLAIN, 90)));
 		partialPath = new PartialPath(pathIterator);
+		partialPath.setSpeed(10);
+		partialPath.addObserver(this);
 		ticker = new Timer(20, (e) -> update());
 		ticker.start();
 	}
@@ -49,76 +53,9 @@ public class Panel extends JPanel {
 	private void update() {
 		if (!partialPath.isComplete()) {
 			partialPath.incrementTime();
-			path = partialPath.getPath();
-			repaint();
 		} else {
 			ticker.stop();
 		}
-	}
-
-	private Path2D nextSegment(PathIterator pi, Path2D path) {
-		double[] coords = new double[6];
-		int type = pathIterator.currentSegment(coords);
-		switch (type) {
-		case PathIterator.SEG_CLOSE:
-			path.closePath();
-			System.out.println("Close");
-			break;
-		case PathIterator.SEG_CUBICTO:
-			path.curveTo(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
-			System.out.println("Cubic: " + Arrays.toString(coords));
-			break;
-		case PathIterator.SEG_LINETO:
-			path.lineTo(coords[0], coords[1]);
-			System.out.println("Line: " + Arrays.toString(coords));
-			break;
-		case PathIterator.SEG_MOVETO:
-			path.moveTo(coords[0], coords[1]);
-			System.out.println("Move: " + Arrays.toString(coords));
-			break;
-		case PathIterator.SEG_QUADTO:
-			path.quadTo(coords[0], coords[1], coords[2], coords[3]);
-			System.out.println("Quad: " + Arrays.toString(coords));
-			break;
-		default:
-			throw new RuntimeException();
-		}
-		pathIterator.next();
-		return path;
-	}
-
-	private Path2D fromPathIterator(PathIterator pi) {
-		Path2D path = new Path2D.Double();
-		double[] coords = new double[6];
-		while (!pathIterator.isDone()) {
-			int type = pathIterator.currentSegment(coords);
-			switch (type) {
-			case PathIterator.SEG_CLOSE:
-				path.closePath();
-				System.out.println("Close");
-				break;
-			case PathIterator.SEG_CUBICTO:
-				path.curveTo(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
-				System.out.println("Cubic: " + Arrays.toString(coords));
-				break;
-			case PathIterator.SEG_LINETO:
-				path.lineTo(coords[0], coords[1]);
-				System.out.println("Line: " + Arrays.toString(coords));
-				break;
-			case PathIterator.SEG_MOVETO:
-				path.moveTo(coords[0], coords[1]);
-				System.out.println("Move: " + Arrays.toString(coords));
-				break;
-			case PathIterator.SEG_QUADTO:
-				path.quadTo(coords[0], coords[1], coords[2], coords[3]);
-				System.out.println("Quad: " + Arrays.toString(coords));
-				break;
-			default:
-				throw new RuntimeException();
-			}
-			pathIterator.next();
-		}
-		return path;
 	}
 
 	public void paintComponent(Graphics g) {
@@ -141,6 +78,15 @@ public class Panel extends JPanel {
 		double y = (getHeight() - bounds.getHeight()) / 2;
 		Shape outline = tl.getOutline(AffineTransform.getTranslateInstance(x - bounds.getX(), y - bounds.getY()));
 		return outline.getPathIterator(null);
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		if(o != partialPath) {
+			return;
+		}
+		path = partialPath.getPath();
+		repaint();
 	}
 
 }

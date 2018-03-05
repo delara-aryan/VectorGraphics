@@ -10,14 +10,14 @@ public class PartialPath extends Observable{
 	private final PathIterator pi;
 	private final Path2D path;
 	private Segment currentSegment;
-	private double t;
+	private double timer;
 	private double speed;
 	private Point2D pstart;
 
 	public PartialPath(PathIterator pi) {
 		this.pi = pi;
 		path = new Path2D.Double();
-		t = 0;
+		timer = 0;
 		currentSegment = getCurrentSegment(pi);
 	}
 
@@ -33,7 +33,7 @@ public class PartialPath extends Observable{
 		case PathIterator.SEG_LINETO:
 			return new LineTo(coords);
 		case PathIterator.SEG_QUADTO:
-			currentSegment = new QuadTo(coords);
+			return new QuadTo(coords);
 		case PathIterator.SEG_CUBICTO:
 			return new CubicTo(coords);
 		default:
@@ -41,7 +41,7 @@ public class PartialPath extends Observable{
 		}
 	}
 
-	void setSpeed(double speed) {
+	public void setSpeed(double speed) {
 		this.speed = speed;
 	}
 
@@ -50,16 +50,21 @@ public class PartialPath extends Observable{
 	}
 
 	public void incrementTime() {
-		if (t < 1) {
-			t += speed / currentSegment.length(path.getCurrentPoint());
+		if (timer < 1) {
+			double length = currentSegment.length(path.getCurrentPoint());
+			if (length != 0) {
+				timer += speed / length;				
+			} else {
+				timer = 1;
+			}
 		}
-		if (t >= 1) {
+		if (timer >= 1) {
 			if(currentSegment != null) {
 				currentSegment.addTo(path);
 				currentSegment = null;
 			}	
 			if (!pi.isDone()) {
-				t = 0;
+				timer = 0;
 				pi.next();
 				currentSegment = getCurrentSegment(pi);
 			}
@@ -69,11 +74,11 @@ public class PartialPath extends Observable{
 	}
 
 	public Path2D getPath() {
-		if (t == 0 || t >= 1) {
+		if (timer == 0 || timer >= 1) {
 			return path;			
 		} else {
 			Path2D copy = new Path2D.Double(path);
-			currentSegment.addTo(copy, t);
+			currentSegment.addTo(copy, timer);
 			return copy;
 		}
 	}
